@@ -1,9 +1,10 @@
-# Worker Tools Base
+# K8s Worker Tools
 
-This repository contains images that contain on the bare minimum to use the execution container feature with Octopus Deploy.
+This repository contains images that contain the tooling necessary to to use the execution container feature with Octopus Deploy when running commands against K8s.
 
-- Python3
-- PowerShell Core
+- Kubectl
+- Helm
+- AWS IAM Authenticator
 
 There are three images built in this repo:
 
@@ -11,6 +12,6 @@ There are three images built in this repo:
 - Ubuntu 18.04
 - Windows 2019
 
-A new image will be built each time a new version of PowerShell Core is created.  The version numbers will be based on the version of PowerShell Core.
+A new image will be built each time a new version of Azure CLI is created.  The version numbers will be based on the version of KubeCTL.
 
 **Please Consider this repository provided as is.  If there are any issues please do not contact support.**

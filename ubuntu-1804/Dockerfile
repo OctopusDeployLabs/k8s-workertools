@@ -33,3 +33,14 @@ RUN curl -sL https://run.linkerd.io/install | sh && \
 RUN sh -c "echo 'deb http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_18.04/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list" && \
     wget -nv https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/xUbuntu_18.04/Release.key -O- | apt-key add - && \
     apt-get update && apt-get install -y skopeo
+
+# Get Azure CLI
+# https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt?view=azure-cli-latest
+RUN wget --quiet -O - https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/microsoft.asc.gpg > /dev/null && \
+    echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ bionic main" | tee /etc/apt/sources.list.d/azure-cli.list && \
+    apt-get update && \
+    apt-get install -y azure-cli
+
+# Get AZ Powershell core modules
+# https://docs.microsoft.com/en-us/powershell/azure/install-az-ps?view=azps-3.6.1
+RUN pwsh -c 'Install-Module -Force -Name Az -AllowClobber -Scope AllUsers'
