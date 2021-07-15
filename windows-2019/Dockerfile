@@ -5,7 +5,7 @@ SHELL ["powershell", "-Command"]
 
 RUN choco install kubernetes-cli -y --no-progress
 
-RUN choco install -y kubernetes-helm --version --no-progress
+RUN choco install -y kubernetes-helm --no-progress
 
 RUN choco install eksctl -y --no-progress
 
