@@ -2,9 +2,13 @@ FROM octopuslabs/workertools:latest-ubuntu.2004
 
 ARG DEBIAN_FRONTEND noninteractive
 
+# Get Kubernetes
 RUN wget --quiet -O - https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -  && \
     echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list && \
     apt-get update && apt-get install -y kubectl
+
+# Get latest Helm v3
+RUN wget --quiet -O - https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
 # Get EKS CLI
 # https://github.com/weaveworks/eksctl
