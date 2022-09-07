@@ -24,8 +24,8 @@ jobs:
         $versionSplit = $version.Split(".")
         $versionToCompare = "$($versionSplit[0]).$($versionSplit[1]).$($versionSplit[2])"
 
-        $workerToolsTags = Invoke-RestMethod "https://registry.hub.docker.com/v1/repositories/octopuslabs/k8s-workertools/tags"
-        $matchingTag = $workerToolsTags | Where-Object { $_.name -eq $versionToCompare }
+        $workerToolsTags = Invoke-RestMethod "https://registry.hub.docker.com/v2/repositories/octopuslabs/k8s-workertools/tags?page_size=50"
+        $matchingTag = $workerToolsTags.results | Where-Object { $_.name -eq $versionToCompare }
 
         echo "::set-output name=VERSION::$versionToCompare"
 
