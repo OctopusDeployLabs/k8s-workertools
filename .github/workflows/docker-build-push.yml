@@ -13,6 +13,7 @@ jobs:
     runs-on: windows-latest
     outputs:
       VERSION: ${{ steps.step1.outputs.VERSION }}
+      GCLOUD_CLI_VERSION: ${{ steps.step1.outputs.GCLOUD_CLI_VERSION }}
       CONTINUE: ${{ steps.step1.outputs.Continue }}
     steps:    
     - uses: actions/checkout@v3
