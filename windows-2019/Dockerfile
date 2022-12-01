@@ -39,4 +39,4 @@ RUN $old = (Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentC
     refreshenv
 
 # Install GKE Auth plugin using GCloud
-RUN gcloud components install gke-gcloud-auth-plugin
+RUN gcloud components install gke-gcloud-auth-plugin --quiet
