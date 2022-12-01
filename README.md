@@ -5,6 +5,7 @@ This repository contains images that contain the tooling necessary to to use the
 - Kubectl
 - Helm
 - AWS IAM Authenticator
+- Google's GKE Cloud Auth Plugin
 
 There are three images built in this repo:
 

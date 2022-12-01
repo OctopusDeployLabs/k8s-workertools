@@ -13,12 +13,52 @@ jobs:
     runs-on: windows-latest
     outputs:
       VERSION: ${{ steps.step1.outputs.VERSION }}
+      GCLOUD_CLI_VERSION: ${{ steps.step1.outputs.GCLOUD_CLI_VERSION }}
       CONTINUE: ${{ steps.step1.outputs.Continue }}
     steps:    
     - uses: actions/checkout@v3
     - id: step1
       name: Compare latest version with container
       run: |
+        Write-Output "Getting GCLOUD CLI version (needed for gke-auth-plugin)"
+        $googleCloudSdkInfo = Invoke-RestMethod "https://registry.hub.docker.com/v2/repositories/google/cloud-sdk/tags?page=1"
+        $otherImages = $googleCloudSdkInfo.results | Where-Object { $_.name -ine "latest" }
+        $latestTag = $googleCloudSdkInfo.results | Where-Object { $_.name -ieq "latest" }
+        
+        if($null -eq $latestTag)  {
+            throw "Couldnt find latest tag for Google Cloud SDK version from DockerHub"
+        }
+        
+        $latestTagImage = $latestTag.images | Where-Object {$_.os -ieq "linux" -and $_.architecture -ieq "amd64" -and $_.status -ieq "active"} | Select-Object -First 1
+        if($null -eq $latestTagImage)  {
+            throw "Couldnt find latest tag image for Google Cloud SDK version for linux/amd64"
+        }
+        $latestDigest = $latestTagImage.digest
+        Write-Output "Found latest digest: $latestDigest"
+
+        $GCLOUD_CLI_VERSION = ""
+        foreach($result in $otherImages) {
+            $matchingImageDigest = $result.images | Where-Object {$_.os -ieq "linux" -and $_.architecture -ieq "amd64" -and $_.status -ieq "active" -and $_.digest -ieq $latestDigest } | Select-Object -First 1
+            if($null -eq $matchingImageDigest) {
+                continue;
+            }
+            else {
+                $version = $result.name
+                Write-Output "Found version '$version' that matches digest: $latestDigest"
+                $versionSplit = $version.Split(".")
+                $GCLOUD_CLI_VERSION = "$($versionSplit[0]).$($versionSplit[1]).$($versionSplit[2])"
+                break;
+            }
+        }
+
+        if ([string]::IsNullOrWhiteSpace($GCLOUD_CLI_VERSION)) {
+            throw "No GCLOUD CLI version with digest $latestDigest found"
+        }
+        else {
+            echo "GCLOUD_CLI_VERSION=$GCLOUD_CLI_VERSION" >> $env:GITHUB_OUTPUT
+        }
+
+        Write-Output "Getting Kubectl version"
         $chocoInformationRaw = choco info kubernetes-cli --limitoutput
         $version = ($chocoInformationRaw.Split("|"))[1]
         $versionSplit = $version.Split(".")
@@ -106,7 +146,8 @@ jobs:
     - name: Build the Docker image
       env:
         VERSION_NUMBER: ${{ needs.get-version-number.outputs.VERSION }}     
-      run: docker build ./windows-2019 --tag octopuslabs/k8s-workertools:${env:VERSION_NUMBER}-windows.2019 --tag octopuslabs/k8s-workertools:latest-windows.2019
+        GCLOUD_CLI_VERSION: ${{ needs.get-version-number.outputs.GCLOUD_CLI_VERSION }}
+      run: docker build ./windows-2019 --build-arg GCLOUD_CLI_VERSION=${env:GCLOUD_CLI_VERSION} --tag octopuslabs/k8s-workertools:${env:VERSION_NUMBER}-windows.2019 --tag octopuslabs/k8s-workertools:latest-windows.2019
       if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
       
     - name: Push the version image
