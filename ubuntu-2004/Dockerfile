@@ -2,9 +2,10 @@ FROM octopuslabs/workertools:latest-ubuntu.2004
 
 ARG DEBIAN_FRONTEND noninteractive
 
-# Get Kubernetes
-RUN wget --quiet -O - https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -  && \
-    echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list && \
+# Get kubectl
+# https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/#install-using-native-package-management
+RUN curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg  && \
+    echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list && \
     apt-get update && apt-get install -y kubectl
 
 # Get latest Helm v3
@@ -19,6 +20,12 @@ RUN curl --silent --location "https://github.com/weaveworks/eksctl/releases/late
 # https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html
 RUN curl --silent --location https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/aws-iam-authenticator -o /usr/local/bin/aws-iam-authenticator && \
     chmod +x /usr/local/bin/aws-iam-authenticator
+
+# Get gke-gcloud-auth-plugin (reqd for kubectl 1.26+)
+# See https://github.com/OctopusDeploy/Issues/issues/7621 for more info
+RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - && \
+    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
+    apt-get update && apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
 
 # Get the Istio CLI
 # https://istio.io/docs/ops/diagnostic-tools/istioctl/

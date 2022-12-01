@@ -3,6 +3,9 @@
 FROM octopuslabs/workertools:latest-windows.2019
 SHELL ["powershell", "-Command"]
 
+# gcloud cli needed for gke auth plugin
+ARG GCLOUD_CLI_VERSION=410.0.0
+
 RUN choco install kubernetes-cli -y --no-progress
 
 RUN choco install -y kubernetes-helm --no-progress
@@ -11,8 +14,29 @@ RUN choco install eksctl -y --no-progress
 
 RUN choco install aws-iam-authenticator -y --no-progress
 
-# # Install Azure CLI
+# Install Azure CLI
 RUN choco install azure-cli -y --no-progress
 
 RUN Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force; `
     Install-Module -Force -Name Az -AllowClobber -Scope AllUsers
+
+# Install gcloud (required for gke-auth-plugin)
+RUN $GCLOUD_VERSION = $env:GCLOUD_CLI_VERSION; `
+    Write-Host "GCLOUD_VERSION: ${env:GCLOUD_CLI_VERSION}"; `
+    Write-Host "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${env:GCLOUD_CLI_VERSION}-windows-x86_64.zip"; `
+    Invoke-WebRequest "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${env:GCLOUD_CLI_VERSION}-windows-x86_64.zip" -OutFile google-cloud-sdk-$env:GCLOUD_CLI_VERSION-windows-x86_64.zip; `
+    & '.\Program Files\7-Zip\7z.exe' x .\google-cloud-sdk-$env:GCLOUD_CLI_VERSION-windows-x86_64.zip; `
+    .\google-cloud-sdk\install.bat --quiet; `
+    rm .\google-cloud-sdk-$env:GCLOUD_CLI_VERSION-windows-x86_64.zip
+
+# Update Path
+RUN $old = (Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name path).path; `
+    Write-Host $old; `
+    $gcloudPath = ';C:\google-cloud-sdk\bin'; `    
+    $new = $old + $gcloudPath; `
+    Write-Host $new; `
+    Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name path -Value $new; `
+    refreshenv
+
+# Install GKE Auth plugin using GCloud
+RUN gcloud components install gke-gcloud-auth-plugin
