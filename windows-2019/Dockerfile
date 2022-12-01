@@ -43,4 +43,4 @@ RUN Write-Host "Installing gke-gcloud-auth-plugin"; `
     $env:CLOUDSDK_PYTHON = (& gcloud components copy-bundled-python); `
     Write-Host "GCLOUDSDK_PYTHON path: ${env:CLOUDSDK_PYTHON}"; `
     $env:GCloud_output = (gcloud components install gke-gcloud-auth-plugin --quiet 2>&1); `
-    if(-not [string]::IsNullOrWhiteSpace($env:GCloud_output)) { Write-Host $($env:GCloud_output -Replace "System.Management.Automation.RemoteException", ""); }
+    if(-not [string]::IsNullOrWhiteSpace($env:GCloud_output)) { Write-Host "${env:GCloud_output}"; }
