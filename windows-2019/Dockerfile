@@ -38,5 +38,9 @@ RUN $old = (Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentC
     Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name path -Value $new; `
     refreshenv
 
-# Install GKE Auth plugin using GCloud
-RUN gcloud components install gke-gcloud-auth-plugin --quiet
+# Install gke-gcloud-auth-plugin (gcloud cli doesnt make this easy)
+RUN Write-Host "Installing gke-gcloud-auth-plugin"; ` 
+    $env:CLOUDSDK_PYTHON = (& gcloud components copy-bundled-python); `
+    Write-Host "GCLOUDSDK_PYTHON path: ${env:CLOUDSDK_PYTHON}"; `
+    $env:GCloud_output = (gcloud components install gke-gcloud-auth-plugin --quiet 2>&1); `
+    if(-not [string]::IsNullOrWhiteSpace($env:GCloud_output)) { Write-Host $($env:GCloud_output -Replace "System.Management.Automation.RemoteException", ""); }
