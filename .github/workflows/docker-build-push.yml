@@ -81,100 +81,100 @@ jobs:
         }      
       shell: powershell
 
-  build-linux:
+  build-ubuntu:
     needs: [get-version-number]
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3    
     
-    - name: Dockerhub Login
+    - name: DockerHub Login
       env:
         USERNAME: ${{ secrets.DOCKER_HUB_USER }}
         PASSWORD: ${{ secrets.DOCKER_HUB_PAT }}
       run: docker login --username $USERNAME --password "$PASSWORD"
     
-    - name: Build the Docker image 
-      env:
-        VERSION_NUMBER: ${{ needs.get-version-number.outputs.VERSION }}     
-      run: docker build ./ubuntu-1804 --tag octopuslabs/k8s-workertools:$VERSION_NUMBER-ubuntu.1804 --tag octopuslabs/k8s-workertools:latest-ubuntu.1804
-      if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
-      
-    - name: Push the version image
-      env:
-        VERSION_NUMBER: ${{ needs.get-version-number.outputs.VERSION }}     
-      run: docker push octopuslabs/k8s-workertools:$VERSION_NUMBER-ubuntu.1804
-      if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
-      
-    - name: Push the latest image
-      env:
-        VERSION_NUMBER: ${{ needs.get-version-number.outputs.VERSION }}     
-      run: docker push octopuslabs/k8s-workertools:latest-ubuntu.1804
-      if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
-
-    - name: Build the Docker image      
+    - name: Build the ubuntu.2004 Docker image 
       env:
         VERSION_NUMBER: ${{ needs.get-version-number.outputs.VERSION }}     
       run: docker build ./ubuntu-2004 --tag octopuslabs/k8s-workertools:$VERSION_NUMBER-ubuntu.2004 --tag octopuslabs/k8s-workertools:latest-ubuntu.2004
       if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
       
-    - name: Push the version image
+    - name: Push the ubuntu.2004 version image
       env:
         VERSION_NUMBER: ${{ needs.get-version-number.outputs.VERSION }}     
       run: docker push octopuslabs/k8s-workertools:$VERSION_NUMBER-ubuntu.2004
       if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
       
-    - name: Push the latest image
+    - name: Push the latest ubuntu.2004 image
       env:
         VERSION_NUMBER: ${{ needs.get-version-number.outputs.VERSION }}     
       run: docker push octopuslabs/k8s-workertools:latest-ubuntu.2004
       if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
+
+    - name: Build the ubuntu.2204 Docker image      
+      env:
+        VERSION_NUMBER: ${{ needs.get-version-number.outputs.VERSION }}     
+      run: docker build ./ubuntu-2204 --tag octopuslabs/k8s-workertools:$VERSION_NUMBER-ubuntu.2204 --tag octopuslabs/k8s-workertools:latest-ubuntu.2204
+      if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
       
-  build-windows-2019:
+    - name: Push the ubuntu.2204 version image
+      env:
+        VERSION_NUMBER: ${{ needs.get-version-number.outputs.VERSION }}     
+      run: docker push octopuslabs/k8s-workertools:$VERSION_NUMBER-ubuntu.2204
+      if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
+      
+    - name: Push the latest ubuntu.2204 image
+      env:
+        VERSION_NUMBER: ${{ needs.get-version-number.outputs.VERSION }}     
+      run: docker push octopuslabs/k8s-workertools:latest-ubuntu.2204
+      if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
+      
+  build-win-2019:
     needs: [get-version-number]
     runs-on: windows-2019
 
     steps:
     - uses: actions/checkout@v3
         
-    - name: Dockerhub Login
+    - name: DockerHub Login
       env:
         USERNAME: ${{ secrets.DOCKER_HUB_USER }}
         PASSWORD: ${{ secrets.DOCKER_HUB_PAT }}
       run: docker login --username ${env:USERNAME} --password "${env:PASSWORD}"
     
-    - name: Build the Docker image
+    - name: Build the win2019 Docker image
       env:
         VERSION_NUMBER: ${{ needs.get-version-number.outputs.VERSION }}     
         GCLOUD_CLI_VERSION: ${{ needs.get-version-number.outputs.GCLOUD_CLI_VERSION }}
       run: docker build ./windows-2019 --build-arg GCLOUD_CLI_VERSION=${env:GCLOUD_CLI_VERSION} --tag octopuslabs/k8s-workertools:${env:VERSION_NUMBER}-windows.2019 --tag octopuslabs/k8s-workertools:latest-windows.2019
       if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
       
-    - name: Push the version image
+    - name: Push the win2019 version image
       env:
         VERSION_NUMBER: ${{ needs.get-version-number.outputs.VERSION }}     
       run: docker push octopuslabs/k8s-workertools:${env:VERSION_NUMBER}-windows.2019
       if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
       
-    - name: Push the latest image
+    - name: Push the latest win2019 image
       env:
         VERSION_NUMBER: ${{ needs.get-version-number.outputs.VERSION }}     
       run: docker push octopuslabs/k8s-workertools:latest-windows.2019
       if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
   
   build-docker-manifest:
-    needs: [build-windows-2019, build-linux, get-version-number]
+    needs: [get-version-number, build-ubuntu, build-win-2019]
     runs-on: ubuntu-latest
     
     steps:
-    - name: Dockerhub Login
+    - name: DockerHub Login
       env:
         USERNAME: ${{ secrets.DOCKER_HUB_USER }}
         PASSWORD: ${{ secrets.DOCKER_HUB_PAT }}
       run: docker login --username $USERNAME --password "$PASSWORD"
       
     - name: Build Manifest
-      run: docker manifest create octopuslabs/k8s-workertools:latest octopuslabs/k8s-workertools:latest-windows.2019 octopuslabs/k8s-workertools:latest-ubuntu.1804
+      run: docker manifest create octopuslabs/k8s-workertools:latest octopuslabs/k8s-workertools:latest-windows.2019 octopuslabs/k8s-workertools:latest-ubuntu.2004
       if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
       
     - name: Push Manifest
@@ -184,7 +184,7 @@ jobs:
     - name: Build Version Manifest
       env:
         VERSION_NUMBER: ${{ needs.get-version-number.outputs.VERSION }}     
-      run: docker manifest create octopuslabs/k8s-workertools:$VERSION_NUMBER octopuslabs/k8s-workertools:$VERSION_NUMBER-windows.2019 octopuslabs/k8s-workertools:$VERSION_NUMBER-ubuntu.1804
+      run: docker manifest create octopuslabs/k8s-workertools:$VERSION_NUMBER octopuslabs/k8s-workertools:$VERSION_NUMBER-windows.2019 octopuslabs/k8s-workertools:$VERSION_NUMBER-ubuntu.2004
       if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
       
     - name: Push Version Manifest

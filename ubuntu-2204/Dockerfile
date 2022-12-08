@@ -1,4 +1,4 @@
-FROM octopuslabs/workertools:latest-ubuntu.1804
+FROM octopuslabs/workertools:latest-ubuntu.2204
 
 ARG DEBIAN_FRONTEND noninteractive
 
@@ -9,7 +9,7 @@ RUN curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packa
     apt-get update && apt-get install -y kubectl
 
 # Install git
-RUN apt-get update && apt-get install -y git
+RUN apt-get update && apt-get install -y git 
 
 # Get latest Helm v3
 RUN wget --quiet -O - https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
@@ -49,11 +49,8 @@ RUN sh -c "echo 'deb http://download.opensuse.org/repositories/devel:/kubic:/lib
     apt-get update && apt-get install -y skopeo
 
 # Get Azure CLI
-# https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt?view=azure-cli-latest
-RUN wget --quiet -O - https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/microsoft.asc.gpg > /dev/null && \
-    echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ bionic main" | tee /etc/apt/sources.list.d/azure-cli.list && \
-    apt-get update && \
-    apt-get install -y azure-cli
+# https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt
+RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
 # JQ
 RUN apt-get install -y jq
