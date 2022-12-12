@@ -49,11 +49,8 @@ RUN sh -c "echo 'deb http://download.opensuse.org/repositories/devel:/kubic:/lib
     apt-get update && apt-get install -y skopeo
 
 # Get Azure CLI
-# https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt?view=azure-cli-latest
-RUN wget --quiet -O - https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/microsoft.asc.gpg > /dev/null && \
-    echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ bionic main" | tee /etc/apt/sources.list.d/azure-cli.list && \
-    apt-get update && \
-    apt-get install -y azure-cli
+# https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt
+RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
 # JQ
 RUN apt-get install -y jq
