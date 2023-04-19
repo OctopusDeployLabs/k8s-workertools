@@ -19,10 +19,12 @@ RUN wget --quiet -O - https://raw.githubusercontent.com/helm/helm/main/scripts/g
 RUN curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp && \
     mv /tmp/eksctl /usr/local/bin
 
-# Get AWS IAM Authenticator
-# https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html
-RUN curl --silent --location https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/aws-iam-authenticator -o /usr/local/bin/aws-iam-authenticator && \
-    chmod +x /usr/local/bin/aws-iam-authenticator
+# Get aws-cli
+# https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+RUN curl --silent -L "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+    unzip awscliv2.zip && \
+    ./aws/install && \
+    rm -f awscliv2.zip
 
 # Get gke-gcloud-auth-plugin (reqd for kubectl 1.26+)
 # See https://github.com/OctopusDeploy/Issues/issues/7621 for more info
