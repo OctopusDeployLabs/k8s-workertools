@@ -12,7 +12,7 @@ RUN choco install -y kubernetes-helm --no-progress
 
 RUN choco install eksctl -y --no-progress
 
-RUN choco install aws-iam-authenticator -y --no-progress
+RUN choco install awscli -y --no-progress
 
 # Install Azure CLI
 RUN choco install azure-cli -y --no-progress
