@@ -4,7 +4,7 @@ FROM octopuslabs/workertools:latest-windows.2019
 SHELL ["powershell", "-Command"]
 
 # gcloud cli needed for gke auth plugin
-ARG GCLOUD_CLI_VERSION=410.0.0
+ARG GCLOUD_CLI_VERSION=433.0.0
 
 RUN choco install kubernetes-cli -y --no-progress
 
@@ -36,6 +36,7 @@ RUN $old = (Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentC
     $new = $old + $gcloudPath; `
     Write-Host $new; `
     Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name path -Value $new; `
+    Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1; `
     refreshenv
 
 # Install gke-gcloud-auth-plugin (gcloud cli doesnt make this easy)
