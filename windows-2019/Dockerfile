@@ -17,6 +17,9 @@ RUN choco install eksctl -y --no-progress
 
 RUN choco install awscli -y --no-progress
 
+# Get Argo
+RUN choco install argocd-cli -y --no-progress
+
 # Install Azure CLI
 RUN choco install azure-cli -y --no-progress
 
