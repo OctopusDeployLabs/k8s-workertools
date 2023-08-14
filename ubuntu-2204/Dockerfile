@@ -14,6 +14,13 @@ RUN apt-get update && apt-get install -y git
 # Get latest Helm v3
 RUN wget --quiet -O - https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
+# Get Kubelogin
+RUN wget --quiet https://github.com/Azure/kubelogin/releases/latest/download/kubelogin-linux-amd64.zip && \
+    unzip kubelogin-linux-amd64.zip -d kubelogin-linux-amd64 && \
+    mv kubelogin-linux-amd64/bin/linux_amd64/kubelogin /usr/local/bin && \
+    rm -rf kubelogin-linux-amd64 && \
+    rm kubelogin-linux-amd64.zip
+    
 # Get EKS CLI
 # https://github.com/weaveworks/eksctl
 RUN curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp && \

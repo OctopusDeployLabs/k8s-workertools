@@ -10,6 +10,9 @@ RUN choco install kubernetes-cli -y --no-progress
 
 RUN choco install -y kubernetes-helm --no-progress
 
+# Get Kubelogin
+RUN choco install azure-kubelogin --no-progress -y
+
 RUN choco install eksctl -y --no-progress
 
 RUN choco install awscli -y --no-progress
