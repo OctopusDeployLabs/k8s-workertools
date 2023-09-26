@@ -111,6 +111,7 @@ jobs:
         USERNAME: ${{ secrets.DOCKER_HUB_USER }}
         PASSWORD: ${{ secrets.DOCKER_HUB_PAT }}
       run: docker login --username $USERNAME --password "$PASSWORD"
+      if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
     
     - name: Build the ubuntu.2004 image 
       env:
@@ -160,6 +161,7 @@ jobs:
         USERNAME: ${{ secrets.DOCKER_HUB_USER }}
         PASSWORD: ${{ secrets.DOCKER_HUB_PAT }}
       run: docker login --username ${env:USERNAME} --password "${env:PASSWORD}"
+      if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
     
     - name: Build the win2019 image
       env:
@@ -192,6 +194,7 @@ jobs:
         USERNAME: ${{ secrets.DOCKER_HUB_USER }}
         PASSWORD: ${{ secrets.DOCKER_HUB_PAT }}
       run: docker login --username ${env:USERNAME} --password "${env:PASSWORD}"
+      if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
     
     - name: Build the win2022 image
       env:
@@ -222,6 +225,7 @@ jobs:
         USERNAME: ${{ secrets.DOCKER_HUB_USER }}
         PASSWORD: ${{ secrets.DOCKER_HUB_PAT }}
       run: docker login --username $USERNAME --password "$PASSWORD"
+      if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
       
     - name: Create docker manifest for latest tag
       run: docker manifest create octopuslabs/k8s-workertools:latest octopuslabs/k8s-workertools:latest-windows.2022 octopuslabs/k8s-workertools:latest-ubuntu.2204
