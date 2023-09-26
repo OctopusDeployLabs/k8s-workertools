@@ -126,8 +126,6 @@ jobs:
       if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
       
     - name: Push the ubuntu.2004 latest image
-      env:
-        VERSION_NUMBER: ${{ needs.get-version-number.outputs.VERSION }}     
       run: docker push octopuslabs/k8s-workertools:latest-ubuntu.2004
       if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
 
@@ -143,9 +141,7 @@ jobs:
       run: docker push octopuslabs/k8s-workertools:$VERSION_NUMBER-ubuntu.2204
       if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
       
-    - name: Push the ubuntu.2204 latest image
-      env:
-        VERSION_NUMBER: ${{ needs.get-version-number.outputs.VERSION }}     
+    - name: Push the ubuntu.2204 latest image  
       run: docker push octopuslabs/k8s-workertools:latest-ubuntu.2204
       if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
       
@@ -176,9 +172,7 @@ jobs:
       run: docker push octopuslabs/k8s-workertools:${env:VERSION_NUMBER}-windows.2019
       if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
       
-    - name: Push the win2019 latest image
-      env:
-        VERSION_NUMBER: ${{ needs.get-version-number.outputs.VERSION }}     
+    - name: Push the win2019 latest image  
       run: docker push octopuslabs/k8s-workertools:latest-windows.2019
       if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
 
@@ -210,8 +204,6 @@ jobs:
       if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
       
     - name: Push the win2022 latest image
-      env:
-        VERSION_NUMBER: ${{ needs.get-version-number.outputs.VERSION }}     
       run: docker push octopuslabs/k8s-workertools:latest-windows.2022
       if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
   
