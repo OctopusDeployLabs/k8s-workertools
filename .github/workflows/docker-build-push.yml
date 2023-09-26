@@ -243,7 +243,7 @@ jobs:
     - name: Create docker manifest for version-specific tag
       env:
         VERSION_NUMBER: ${{ needs.get-version-number.outputs.VERSION }}     
-      run: docker manifest create octopuslabs/k8s-workertools:$VERSION_NUMBER octopuslabs/k8s-workertools:$VERSION_NUMBER-windows.2022 octopuslabs/k8s-workertools:$VERSION_NUMBER-ubuntu.2204
+      run: docker manifest create octopuslabs/k8s-workertools:$VERSION_NUMBER octopuslabs/k8s-workertools:$VERSION_NUMBER-windows.2019 octopuslabs/k8s-workertools:$VERSION_NUMBER-windows.2022 octopuslabs/k8s-workertools:$VERSION_NUMBER-ubuntu.2204
       if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
 
     - name: Annotate docker manifest for version-specific tag
