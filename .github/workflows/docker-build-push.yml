@@ -60,43 +60,52 @@ jobs:
             echo "GCLOUD_CLI_VERSION=$GCLOUD_CLI_VERSION" >> $env:GITHUB_OUTPUT
         }
 
-        Write-Output "Getting Kubectl version"
+        Write-Output "Getting kubectl version"
         $chocoInformationRaw = choco info kubernetes-cli --limitoutput
         $version = ($chocoInformationRaw.Split("|"))[1]
-        $versionSplit = $version.Split(".")
-        $versionToCompare = "$($versionSplit[0]).$($versionSplit[1]).$($versionSplit[2])"
 
-        $workerToolsTags = Invoke-RestMethod "https://registry.hub.docker.com/v2/repositories/octopuslabs/k8s-workertools/tags?page_size=50"
-        $matchingTag = $workerToolsTags.results | Where-Object { $_.name -eq $versionToCompare }
-
-        echo "VERSION=$versionToCompare" >> $env:GITHUB_OUTPUT
-
-        if ($null -ne $matchingTag)
+        if($version -like "*Failed to fetch results*") 
         {
-            Write-Host "Docker container already has latest version"
+            Write-Host "Failed to retrieve kubectl details from Chocolatey"
             echo "CONTINUE=No" >> $env:GITHUB_OUTPUT
         }
-        else
+        else 
         {
-            Write-Host "We need to upgrade the container to $versionToCompare"            
-            echo "CONTINUE=Yes" >> $env:GITHUB_OUTPUT
+          $versionSplit = $version.Split(".")
+          $versionToCompare = "$($versionSplit[0]).$($versionSplit[1]).$($versionSplit[2])"
+
+          $workerToolsTags = Invoke-RestMethod "https://registry.hub.docker.com/v2/repositories/octopuslabs/k8s-workertools/tags?page_size=50"
+          $matchingTag = $workerToolsTags.results | Where-Object { $_.name -eq $versionToCompare }
+
+          echo "VERSION=$versionToCompare" >> $env:GITHUB_OUTPUT
+
+          if ($null -ne $matchingTag)
+          {
+              Write-Host "Docker container already has latest version"
+              echo "CONTINUE=No" >> $env:GITHUB_OUTPUT
+          }
+          else
+          {
+              Write-Host "We need to upgrade the container to $versionToCompare"            
+              echo "CONTINUE=Yes" >> $env:GITHUB_OUTPUT
+          }
+
+          Write-Host "Getting OS versions for windows 2022 and 2019"
+          $win2019_manifest = (docker manifest inspect --verbose "octopuslabs/workertools:latest-windows.2019" | ConvertFrom-Json)
+          $WIN2019_VERSION = $win2019_manifest.Descriptor.Platform.'os.version'
+          Write-Host "WIN2019_VERSION: $WIN2019_VERSION"
+
+          $win2022_manifest = (docker manifest inspect --verbose "octopuslabs/workertools:latest-windows.2022" | ConvertFrom-Json)
+          $WIN2022_VERSION = $win2022_manifest.Descriptor.Platform.'os.version'
+          Write-Host "WIN2022_VERSION: $WIN2022_VERSION"
+
+          if([string]::IsNullOrWhiteSpace($WIN2019_VERSION) -or [string]::IsNullOrWhiteSpace($WIN2022_VERSION)) {
+            throw "Could not establish OS versions for windows 2022 and 2019 needed for docker manifest"
+          }
+
+          echo "WIN2019_VERSION=$WIN2019_VERSION" >> $env:GITHUB_OUTPUT
+          echo "WIN2022_VERSION=$WIN2022_VERSION" >> $env:GITHUB_OUTPUT
         }
-
-        Write-Host "Getting OS versions for windows 2022 and 2019"
-        $win2019_manifest = (docker manifest inspect --verbose "octopuslabs/workertools:latest-windows.2019" | ConvertFrom-Json)
-        $WIN2019_VERSION = $win2019_manifest.Descriptor.Platform.'os.version'
-        Write-Host "WIN2019_VERSION: $WIN2019_VERSION"
-
-        $win2022_manifest = (docker manifest inspect --verbose "octopuslabs/workertools:latest-windows.2022" | ConvertFrom-Json)
-        $WIN2022_VERSION = $win2022_manifest.Descriptor.Platform.'os.version'
-        Write-Host "WIN2022_VERSION: $WIN2022_VERSION"
-
-        if([string]::IsNullOrWhiteSpace($WIN2019_VERSION) -or [string]::IsNullOrWhiteSpace($WIN2022_VERSION)) {
-          throw "Could not establish OS versions for windows 2022 and 2019 needed for docker manifest"
-        }
-
-        echo "WIN2019_VERSION=$WIN2019_VERSION" >> $env:GITHUB_OUTPUT
-        echo "WIN2022_VERSION=$WIN2022_VERSION" >> $env:GITHUB_OUTPUT
       shell: powershell
 
   build-ubuntu:
