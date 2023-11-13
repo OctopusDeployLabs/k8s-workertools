@@ -1,5 +1,6 @@
 FROM octopuslabs/workertools:latest-ubuntu.2204
 
+ARG Aws_Iam_Authenticator_Version=0.5.9
 ARG DEBIAN_FRONTEND noninteractive
 
 # Get kubectl
@@ -30,6 +31,11 @@ RUN wget --quiet https://github.com/Azure/kubelogin/releases/latest/download/kub
 # https://github.com/weaveworks/eksctl
 RUN curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp && \
     mv /tmp/eksctl /usr/local/bin
+
+# Get AWS IAM Authenticator
+# https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html
+RUN curl --silent --location https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v${Aws_Iam_Authenticator_Version}/aws-iam-authenticator_${Aws_Iam_Authenticator_Version}_linux_amd64 -o /usr/local/bin/aws-iam-authenticator && \
+    chmod +x /usr/local/bin/aws-iam-authenticator
 
 # Get aws-cli
 # https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html

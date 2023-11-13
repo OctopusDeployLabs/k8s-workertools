@@ -5,6 +5,7 @@ SHELL ["powershell", "-Command"]
 
 # gcloud cli needed for gke auth plugin
 ARG GCLOUD_CLI_VERSION=433.0.0
+ARG Aws_Iam_Authenticator_Version=0.5.9
 
 RUN choco install kubernetes-cli -y --no-progress
 
@@ -14,6 +15,9 @@ RUN choco install -y kubernetes-helm --no-progress
 RUN choco install azure-kubelogin --no-progress -y
 
 RUN choco install eksctl -y --no-progress
+
+# Install the AWS IAM Authenticator 
+RUN choco install aws-iam-authenticator -y --version $Env:Aws_Iam_Authenticator_Version --no-progress
 
 RUN choco install awscli -y --no-progress
 
