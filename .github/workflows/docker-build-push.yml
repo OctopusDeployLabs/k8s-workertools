@@ -14,6 +14,7 @@ jobs:
     outputs:
       VERSION: ${{ steps.step1.outputs.VERSION }}
       GCLOUD_CLI_VERSION: ${{ steps.step1.outputs.GCLOUD_CLI_VERSION }}
+      KUBECTL_MAJOR_MINOR_VERSION: ${{ steps.step1.outputs.KUBECTL_MAJOR_MINOR_VERSION }}
       CONTINUE: ${{ steps.step1.outputs.Continue }}
       WIN2019_VERSION: ${{ steps.step1.outputs.WIN2019_VERSION }}
       WIN2022_VERSION: ${{ steps.step1.outputs.WIN2022_VERSION }}
@@ -73,11 +74,16 @@ jobs:
         else {
             $versionToCompare = "$($version.Major).$($version.Minor).$($version.Build)"
             Write-Host "Parsed version as $versionToCompare"
+            
+            # Major/minor version is used for linux dockerfile to install kubectl correctly
+            $majorMinorVersion = "$($version.Major).$($version.Minor)"
+            Write-Host "kubectl Major.Minor: $majorMinorVersion"
 
             $workerToolsTags = Invoke-RestMethod "https://registry.hub.docker.com/v2/repositories/octopuslabs/k8s-workertools/tags?page_size=50"
             $matchingTag = $workerToolsTags.results | Where-Object { $_.name -eq $versionToCompare }
 
             echo "VERSION=$versionToCompare" >> $env:GITHUB_OUTPUT
+            echo "KUBECTL_MAJOR_MINOR_VERSION=$majorMinorVersion" >> $env:GITHUB_OUTPUT
 
             if ($null -ne $matchingTag)
             {
@@ -126,8 +132,9 @@ jobs:
     
     - name: Build the ubuntu.2004 image 
       env:
-        VERSION_NUMBER: ${{ needs.get-version-number.outputs.VERSION }}     
-      run: docker build ./ubuntu-2004 --tag octopuslabs/k8s-workertools:$VERSION_NUMBER-ubuntu.2004 --tag octopuslabs/k8s-workertools:latest-ubuntu.2004
+        VERSION_NUMBER: ${{ needs.get-version-number.outputs.VERSION }}
+        KUBECTL_MAJOR_MINOR_VERSION: ${{ needs.get-version-number.outputs.KUBECTL_MAJOR_MINOR_VERSION }}    
+      run: docker build ./ubuntu-2004 --build-arg KUBECTL_MAJOR_MINOR_VERSION=$KUBECTL_MAJOR_MINOR_VERSION --tag octopuslabs/k8s-workertools:$VERSION_NUMBER-ubuntu.2004 --tag octopuslabs/k8s-workertools:latest-ubuntu.2004
       if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
       
     - name: Push the ubuntu.2004 version-specific image
@@ -142,8 +149,9 @@ jobs:
 
     - name: Build the ubuntu.2204 image      
       env:
-        VERSION_NUMBER: ${{ needs.get-version-number.outputs.VERSION }}     
-      run: docker build ./ubuntu-2204 --tag octopuslabs/k8s-workertools:$VERSION_NUMBER-ubuntu.2204 --tag octopuslabs/k8s-workertools:latest-ubuntu.2204
+        VERSION_NUMBER: ${{ needs.get-version-number.outputs.VERSION }}
+        KUBECTL_MAJOR_MINOR_VERSION: ${{ needs.get-version-number.outputs.KUBECTL_MAJOR_MINOR_VERSION }}     
+      run: docker build ./ubuntu-2204 --build-arg KUBECTL_MAJOR_MINOR_VERSION=$KUBECTL_MAJOR_MINOR_VERSION --tag octopuslabs/k8s-workertools:$VERSION_NUMBER-ubuntu.2204 --tag octopuslabs/k8s-workertools:latest-ubuntu.2204
       if: ${{ needs.get-version-number.outputs.CONTINUE == 'Yes' }}
       
     - name: Push the ubuntu.2204 version-specific image
